@@ -10,16 +10,22 @@
 #include <string.h>
 
 #define ENV_VAR   "EXPLOIT"
-#define BUFLEN    64
+#define BUFLEN    2
 
 char buf[BUFLEN];
 char *env;
 
 int
-main()
+main(int argc, char **argv)
 {
-  fprintf(stderr, "buflen: %d\nenv_var: %s\n\n", BUFLEN, ENV_VAR);
-  if ( (env = getenv(ENV_VAR)) )
+  fprintf(stderr, "buflen: %d\nenv_var: %s\nargs: %d\n\n", BUFLEN, ENV_VAR, (argc - 1));
+  if (argc > 1)
+    {
+      fprintf(stderr, "arg0: %s\n", argv[1]);
+
+      strcpy(buf, argv[1]);
+    }
+  else if ((env = getenv(ENV_VAR)))
     {
       fprintf(stderr, "env_var: "ENV_VAR"\n");
       fprintf(stderr, "env: %s\n", env);
@@ -28,8 +34,11 @@ main()
     }
   else
     {
-      fprintf(stderr, "env_var: "ENV_VAR" not set, abort!\n");
+      fprintf(stderr, "neither env_var ("ENV_VAR") set or arg0 given, abort!\n");
+      return(1);
     }
 
-  return(0);
+  printf("buf: %p\n", buf);
+
+  return (0);
 }

@@ -8,7 +8,7 @@ exploit:
 
 overflow:
 	@echo 'building overflow'
-	gcc -Wall -g -fno-stack-protector --param ssp-buffer-size=2 overflow.c -o overflow
+	gcc -Wall -m32 -mpreferred-stack-boundary=2 -g -fno-stack-protector overflow.c -o overflow
 
 clean:
 	-$(RM) overflow exploit
