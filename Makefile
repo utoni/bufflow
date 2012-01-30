@@ -4,11 +4,11 @@ all: exploit overflow
 
 exploit:
 	@echo 'building exploit'
-	gcc -g -fno-stack-protector exploit.c -o exploit
+	gcc -Wall -g exploit.c -o exploit
 
 overflow:
 	@echo 'building overflow'
-	gcc -g -fno-stack-protector overflow.c -o overflow
+	gcc -Wall -g -fno-stack-protector --param ssp-buffer-size=2 overflow.c -o overflow
 
 clean:
 	-$(RM) overflow exploit
