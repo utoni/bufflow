@@ -10,7 +10,7 @@
 #include <string.h>
 
 #define ENV_VAR   "EXPLOIT"
-#define BUFLEN    2
+#define BUFLEN    10
 
 char buf[BUFLEN];
 char *env;
@@ -22,14 +22,14 @@ main(int argc, char **argv)
   if (argc > 1)
     {
       fprintf(stderr, "arg0: %s\n", argv[1]);
-
+      /* possible stack overflow via command line */
       strcpy(buf, argv[1]);
     }
   else if ((env = getenv(ENV_VAR)))
     {
       fprintf(stderr, "env_var: "ENV_VAR"\n");
       fprintf(stderr, "env: %s\n", env);
-
+      /* possible stack overflow via enviroment variable */
       strcpy(buf, env);
     }
   else
@@ -38,7 +38,7 @@ main(int argc, char **argv)
       return(1);
     }
 
-  printf("buf: %p\n", buf);
+  printf("*buf: %p\n", buf);
 
   return (0);
 }
