@@ -12,33 +12,36 @@
 #define ENV_VAR   "EXPLOIT"
 #define BUFLEN    10
 
-char buf[BUFLEN];
-char *env;
+
+void
+overflow(const char *src, char *dst)
+{
+  /* exploitable function */
+  strcpy(dst, src);
+}
 
 int
 main(int argc, char **argv)
 {
+  char *s, *env;
+  char buf[BUFLEN];
+
   fprintf(stderr, "buflen: %d\nenv_var: %s\nargs: %d\n\n", BUFLEN, ENV_VAR, (argc - 1));
   if (argc > 1)
     {
-      fprintf(stderr, "arg0: %s\n", argv[1]);
-      /* possible stack overflow via command line */
-      strcpy(buf, argv[1]);
+      overflow(argv[1], buf);
     }
   else if ((env = getenv(ENV_VAR)))
     {
-      fprintf(stderr, "env_var: "ENV_VAR"\n");
-      fprintf(stderr, "env: %s\n", env);
-      /* possible stack overflow via enviroment variable */
-      strcpy(buf, env);
+      overflow(env, buf);
     }
   else
     {
-      fprintf(stderr, "neither env_var ("ENV_VAR") set or arg0 given, abort!\n");
+      fprintf(stderr, "neither "ENV_VAR" set or arg0 given, abort!\n");
       return(1);
     }
 
-  printf("*buf: %p\n", buf);
+  printf("buf: %s\n*buf: %p\nbuflen: %d\n", s, s, strlen(s));
 
   return (0);
 }
