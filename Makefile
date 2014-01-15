@@ -2,30 +2,19 @@ RM := rm
 CC := gcc
 CFLAGS = -Wall -g3
 OCFLAGS = -m32 -mpreferred-stack-boundary=2 -z execstack -fno-stack-protector
-BINS = exploit
-OBINS = overflow overflow_minimal overflow_function exploit
+TARGETS = $(patsubst %.c,%.o,$(wildcard *.c))
 
-all: exploit overflow
+all: $(TARGETS) msg
 
-exploit:
-	@echo 'building exploits'
-	for file in $(BINS); do \
-		$(CC) $(CFLAGS) exploit.c -o exploit; \
-	done
+msg:
+	@echo "now run:"
+	@echo "  ./disable_prot.sh"
+	@echo "  ./exploit"
 
-overflow:
-	@echo 'building exploitable binaries'
-	for file in $(OBINS); do \
-		$(CC) $(CFLAGS) $(OCFLAGS) $$file.c -o $$file; \
-	done
+%.o : %.c
+	$(CC) $(CFLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@) $<
 
 clean:
-	for file in $(BINS); do \
-		$(RM) -f $$file; \
-	done
-	for file in $(OBINS); do \
-		$(RM) -f $$file; \
-	done
-	@echo ' '
+	$(RM) -f $(patsubst %.o,%,$(TARGETS))
 
 .PHONY: all clean
