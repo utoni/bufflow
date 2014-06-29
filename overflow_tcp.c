@@ -6,19 +6,32 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
-#include <signal.h>
 
 #define MAXLINE 1024
 #define BUFLEN 256
 #define SERV_PORT 3000
 #define LISTENQ 8
 
+
+int exploitable(int fd)
+{
+  int n;
+  char buf[BUFLEN];
+
+  memset(buf, 0, BUFLEN);
+  if (buf[0] == EOF) {
+    return (0);
+  }
+
+  n = recv(fd, buf, MAXLINE, 0);
+  fprintf(stderr, "Received string(%d): %s", n, buf);
+  return (n);
+}
+
 int main (int argc, char **argv)
 {
-  int listenfd, connfd, n, line = 0, status;
-  pid_t childpid, w;
+  int listenfd, connfd, n;
   socklen_t clilen;
-  char buf[BUFLEN];
   struct sockaddr_in cliaddr, servaddr;
 
   if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) <0) {
@@ -41,26 +54,17 @@ int main (int argc, char **argv)
 
   fprintf(stderr, "Server running on port %d ...\n", SERV_PORT);
   for (;;) {
-    memset(buf, 0, BUFLEN);
     clilen = sizeof(cliaddr);
-    connfd = accept (listenfd, (struct sockaddr *) &cliaddr, &clilen);
+    connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &clilen);
     if (connfd < 0) break;
     fprintf(stderr, "Client connected.\n");
-    if ((childpid = fork ()) == 0 ) {
-      while ((n = recv(connfd, buf, MAXLINE,0)) > 0)  {
-        fprintf(stderr, "[%d] Received string(%d): %s", line, n, buf);
-        memset(buf, 0, BUFLEN);
-        line++;
-      }
-      exit(1);
+    while ((n = exploitable(connfd)) > 0)  {
     }
-    if ((w = wait(&status))) {
-      if (WIFEXITED(status)) {
-        kill(w, SIGCHLD);
-      }
-    }
+    fprintf(stderr, "disconnecting client ..\n");
+    close(connfd);
   }
 
+  fprintf(stderr, "shutdown ..\n");
   close(listenfd);
   return (0);
 }
