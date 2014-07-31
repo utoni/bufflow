@@ -5,7 +5,10 @@ CFLAGS = -Wall -g
 OCFLAGS = -m32 -mpreferred-stack-boundary=2 -z execstack -fno-stack-protector
 TARGETS = $(patsubst %.c,%.o,$(wildcard *.c))
 
-all: $(TARGETS) post-build
+all: shellcode $(TARGETS) post-build
+
+shellcode:
+	make -f shellcode/Makefile SUBDIR=shellcode
 
 post-build:
 	@read -p "disable protection stuff? (y/N) " answ; \
@@ -28,5 +31,6 @@ disable-prot:
 
 clean:
 	$(RM) -f $(patsubst %.o,%,$(TARGETS))
+	make -f shellcode/Makefile SUBDIR=shellcode clean
 
-.PHONY: all clean
+.PHONY: shellcode all clean
