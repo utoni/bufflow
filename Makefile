@@ -3,9 +3,10 @@ CC := gcc
 STRIP := strip
 CFLAGS = -Wall -g
 OCFLAGS = -m32 -mpreferred-stack-boundary=2 -z execstack -fno-stack-protector
-TARGETS = $(patsubst %.c,%.o,$(wildcard *.c))
+SOURCES = $(wildcard *.c)
+TARGETS = $(patsubst %.c,%.o,$(SOURCES))
 
-all: shellcode $(TARGETS) post-build
+all: $(SOURCES) $(TARGETS) shellcode post-build
 
 shellcode:
 	make -f shellcode/Makefile SUBDIR=shellcode
@@ -28,9 +29,11 @@ disable-prot:
 
 %.o : %.c
 	$(CC) $(CFLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@) $<
+	ln -s $< $@
 
 clean:
 	$(RM) -f $(patsubst %.o,%,$(TARGETS))
+	$(RM) -f $(TARGETS)
 	make -f shellcode/Makefile SUBDIR=shellcode clean
 
-.PHONY: shellcode all clean
+.PHONY: shellcode clean
