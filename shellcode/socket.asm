@@ -14,7 +14,8 @@ int		0x80		; let the kernel do the stuff
 ; bind()
 mov		edx,eax		; move socket descriptor (returned by socket()) to edx
 xor		eax,eax		; zero out eax again
-push		0x0		; in_addr = 0
+; sockaddr_in
+push		eax		; in_addr = 0
 push word	0x11AA		; push tcp port 
 push word 	0x2		; sa_family -> AF_INET = 0x02
 mov		ecx,esp		; save stack pointer -> pointer to sockaddr struct
@@ -26,6 +27,14 @@ mov		ebx,0x02	; set socket subcall to 0x03 (bind)
 mov		al,0x66		; socketcall syscall
 int		0x80		; let the kernel do the stuff
 
+; listen()
+xor		eax,eax		; zero out eax
+push		eax		; backlog
+push		edx		; sockfd
+mov		ecx,esp		; save stackptr
+mov		al,0x66		; socketcall()
+mov		ebx,0x4		; socketcall 0x4 -> listen()
+int		0x80		; kernel mode
 
 ; exit()
 mov		al,0x1		; exit syscall
