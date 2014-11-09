@@ -2,7 +2,9 @@ RM := rm
 CC := gcc
 STRIP := strip
 CFLAGS = -Wall -g
-OCFLAGS = -m32 -mpreferred-stack-boundary=2 -z execstack -fno-stack-protector
+OCFLAGS = -z execstack -fno-stack-protector
+X86_FLAGS = -m32 -mpreferred-stack-boundary=2
+X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
 TARGETS = $(patsubst %.c,%.o,$(SOURCES))
 
@@ -28,7 +30,8 @@ disable-prot:
 	fi
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@) $<
+	$(CC) $(CFLAGS) $(X86_FLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@) $<
+	$(CC) $(CFLAGS) $(X64_FLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@)_x64 $<
 	ln -s $< $@
 
 clean:
