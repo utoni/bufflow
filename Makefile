@@ -8,10 +8,15 @@ X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
 TARGETS = $(patsubst %.c,%.o,$(SOURCES))
 
-all: $(SOURCES) $(TARGETS) shellcode post-build
+all: $(SOURCES) $(TARGETS) shellcode crypter post-build
+
+main: $(SOURCES) $(TARGETS)
 
 shellcode:
 	make -f shellcode/Makefile SUBDIR=shellcode
+
+crypter:
+	make -f crypter/Makefile SUBDIR=crypter SCDIR=.
 
 post-build:
 	@read -p "disable protection stuff? (y/N) " answ; \
@@ -35,8 +40,9 @@ disable-prot:
 	ln -s $< $@
 
 clean:
-	$(RM) -f $(patsubst %.o,%,$(TARGETS))
+	$(RM) -f $(patsubst %.o,%,$(TARGETS)) $(patsubst %.c,%_x64,$(wildcard *.c))
 	$(RM) -f $(TARGETS)
 	make -f shellcode/Makefile SUBDIR=shellcode clean
+	make -f crypter/Makefile SUBDIR=crypter clean
 
-.PHONY: shellcode clean
+.PHONY: shellcode crypter clean
