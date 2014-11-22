@@ -44,7 +44,10 @@ main(int argc, char **argv) {
 
   memset(&sbuf, '\0', sizeof(struct stat));
   if (argc < 3) usage(argv[0]);
-  if (stat(argv[2], &sbuf)) barf("failed to stat file");
+  if (stat(argv[2], &sbuf)) {
+    fprintf(stderr, "file: %s\n", argv[2]);
+    barf("failed to stat");
+  }
   flen = (long) sbuf.st_size;
   if (!(code = calloc(1, flen))) barf("failed to grab memory");
   if (!(fp = fopen(argv[2], "rb"))) barf("failed to open file");
