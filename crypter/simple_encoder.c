@@ -76,6 +76,7 @@ main(int argc, char **argv)
       printf("// decoder[%d] = %u (%02x)\n", i, (unsigned char) decoder[i], (unsigned char) decoder[i]);
     }
   }
+  printf("\n");
 
   do {
     if (nullbyte == 1) {
@@ -88,9 +89,17 @@ main(int argc, char **argv)
       shellcode[i] += number;
       if (shellcode[i] == '\x00') {
         nullbyte = 1;
+        printf("Recode!\n");
       }
     }
   } while (nullbyte == 1);
 
+  result = malloc(ldecoder + lshellcode + 1);
+  memcpy(result, (const void *) decoder, ldecoder);
+  memcpy(result + ldecoder, shellcode, lshellcode);
+  *(result + ldecoder + lshellcode) = '\0';
+  print_code("result", result, ldecoder + lshellcode);
+
+  free(result);
   return (0);
 }
