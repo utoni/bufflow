@@ -26,5 +26,6 @@ endif
 
 clean:
 	$(RM) -f $(patsubst %.o,%,$(TARGETS)) $(TARGETS) $(patsubst %.o,%.h,$(TARGETS))
+	$(RM) -f *.o
 
 .PHONY: all clean

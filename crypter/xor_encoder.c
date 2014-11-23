@@ -1,4 +1,4 @@
-//	#DECODER=./simple_decoder.o
+//	#DECODER=./xor_decoder.o
 //	#SHELLCODE=../shellcode/hello.o
 #define _GNU_SOURCE 1
 
@@ -9,17 +9,17 @@
 #include <unistd.h>
 
 #ifdef _USE_CFG
-#include "simple_encoder.h"
+#include "xor_encoder.h"
 #else
-#error "simple_encoder.h config file missing including decoder && shellcode"
+#error "xor_encoder.h config file missing including decoder && shellcode"
 #endif
 
 #ifndef _CRYPTVAL
-#define _CRYPTVAL 200
+#define _CRYPTVAL 256
 #endif
 
 #ifndef _OUTFILE
-#define _OUTFILE "simple_encoded.o"
+#define _OUTFILE "xor_encoded.o"
 #endif
 
 
@@ -101,23 +101,28 @@ main(int argc, char **argv)
   }
   printf("\n");
 
+  result = malloc(lshellcode);
   do {
+    memcpy(result, shellcode, lshellcode);
+
     if (nullbyte == 1) {
-      number = getnumber(10);
-      decoder[npos] += number;
-      fprintf(stderr, "New crypt value: %d (%02x)\n", decoder[npos], decoder[npos]);
+      number = getnumber(_CRYPTVAL);
+      fprintf(stderr, "New crypt value: %d (%02x)\n", number, number);
+      decoder[npos] = number;
       nullbyte = 0;
     }
 
     for (i = 0; i < lshellcode; i++) {
-      shellcode[i] += number;
-      if (shellcode[i] == '\x00') {
+      result[i] ^= number;
+      if (result[i] == '\x00') {
         nullbyte = 1;
         fprintf(stderr, "Recode!\n");
         break;
       }
     }
   } while (nullbyte == 1);
+  memcpy(shellcode, result, lshellcode);
+  free(result);
 
   result = malloc(ldecoder + lshellcode + 1);
   memcpy(result, (const void *) decoder, ldecoder);
