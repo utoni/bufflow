@@ -1,5 +1,7 @@
 //	#DECODER=./simple_decoder.o
 //	#SHELLCODE=../shellcode/hello.o
+#define _GNU_SOURCE 1
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -14,6 +16,10 @@
 
 #ifndef _CRYPTVAL
 #define _CRYPTVAL 200
+#endif
+
+#ifndef _OUTFILE
+#define _OUTFILE "simple_encoded.o"
 #endif
 
 
@@ -49,6 +55,22 @@ print_code(const char *name, char *data, int len)
   printf("\";\n\n");
 }
 
+void
+err_n_xit(const char *exit_msg, const char *arg)
+{
+  char *tmp;
+  if (arg != NULL) {
+    asprintf(&tmp, "%s('%s')", exit_msg, arg);
+  } else {
+    tmp = (char *) exit_msg;
+  }
+  perror(tmp);
+  if (arg != NULL) {
+    free(tmp);
+  }
+  exit(1);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -57,6 +79,7 @@ main(int argc, char **argv)
   int lshellcode = sizeof(shellcode)-1; /* same as above */
   int first_arg = 1;
   char *result;
+  FILE *outfile;
 
   printf("/* Using value %d to encode the shellcode. */\n", number);
   printf("/* PRINT SHELLCODE */\n");
@@ -99,6 +122,13 @@ main(int argc, char **argv)
   memcpy(result + ldecoder, shellcode, lshellcode);
   *(result + ldecoder + lshellcode) = '\0';
   print_code("result", result, ldecoder + lshellcode);
+
+  /* write2file */
+  outfile = fopen(_OUTFILE, "w+b");
+  if (outfile == NULL) err_n_xit("fopen", _OUTFILE);
+  if (fwrite((void *) result, sizeof(char), strlen(result), outfile) != strlen(result)) err_n_xit("fwrite", _OUTFILE);
+  if (fclose(outfile) != 0) err_n_xit("fclose", _OUTFILE);
+  fprintf(stderr, "outfile: %s\n", _OUTFILE);
 
   free(result);
   return (0);
