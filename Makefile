@@ -1,3 +1,5 @@
+CD := cd
+MAKE := make
 RM := rm
 CC := gcc
 STRIP := strip
@@ -13,10 +15,10 @@ all: $(SOURCES) $(TARGETS) shellcode crypter post-build
 main: $(SOURCES) $(TARGETS)
 
 shellcode:
-	make -f shellcode/Makefile SUBDIR=shellcode
+	$(MAKE) -C shellcode all
 
 crypter:
-	make -f crypter/Makefile SUBDIR=crypter SCDIR=.
+	$(MAKE) -C crypter all
 
 post-build:
 	@read -p "disable protection stuff? (y/N) " answ; \
@@ -42,7 +44,7 @@ disable-prot:
 clean:
 	$(RM) -f $(patsubst %.o,%,$(TARGETS)) $(patsubst %.c,%_x64,$(wildcard *.c))
 	$(RM) -f $(TARGETS)
-	make -f shellcode/Makefile SUBDIR=shellcode clean
-	make -f crypter/Makefile SUBDIR=crypter clean
+	$(MAKE) -C crypter clean
+	$(MAKE) -C shellcode clean
 
 .PHONY: shellcode crypter clean
