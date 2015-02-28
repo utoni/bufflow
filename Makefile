@@ -1,6 +1,7 @@
 RM := rm
 CC := gcc
 STRIP := strip
+LBITS := $(shell getconf LONG_BIT)
 CFLAGS = -Wall -g
 OCFLAGS = -z execstack -fno-stack-protector
 X86_FLAGS = -m32 -mpreferred-stack-boundary=2
@@ -36,7 +37,9 @@ disable-prot:
 
 %.o : %.c
 	$(CC) $(CFLAGS) $(X86_FLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@) $<
+ifeq ($(LBITS),64)
 	-$(CC) $(CFLAGS) $(X64_FLAGS) $(OCFLAGS) -o $(patsubst %.o,%,$@)_x64 $<
+endif
 	ln -s $< $@
 
 clean:

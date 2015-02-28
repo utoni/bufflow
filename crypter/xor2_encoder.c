@@ -9,9 +9,9 @@
 #include <unistd.h>
 
 #ifdef _USE_CFG
-#include "xor_encoder.h"
+#include "xor2_encoder.h"
 #else
-#error "xor_encoder.h config file missing including decoder && shellcode"
+#error "xor2_encoder.h config file missing including decoder && shellcode"
 #endif
 
 #ifndef _CRYPTVAL
@@ -19,7 +19,7 @@
 #endif
 
 #ifndef _OUTFILE
-#define _OUTFILE "xor_encoded.o"
+#define _OUTFILE "xor2_encoded.o"
 #endif
 
 
