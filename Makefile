@@ -4,8 +4,8 @@ RM := rm
 CC := gcc
 STRIP := strip
 LBITS := $(shell getconf LONG_BIT)
-CFLAGS = -Wall -g
-OCFLAGS = -z execstack -fno-stack-protector
+CFLAGS += -Wall
+OCFLAGS += -z execstack -fno-stack-protector
 X86_FLAGS = -m32 -mpreferred-stack-boundary=2
 X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
@@ -14,6 +14,9 @@ TARGETS = $(patsubst %.c,%,$(SOURCES))
 all: $(TARGETS) shellcode crypter
 
 main: $(TARGETS)
+
+debug:
+	$(MAKE) -C . CFLAGS="-g"
 
 shellcode:
 	$(MAKE) -C shellcode all
