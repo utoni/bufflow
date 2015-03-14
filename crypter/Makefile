@@ -37,6 +37,7 @@ endif
 clean:
 	$(RM) -f *.o
 	$(RM) -f $(patsubst %.c,%,$(SOURCES_C)) $(patsubst %.c,%_x64,$(SOURCES_C))
+	$(RM) -f $(patsubst %.c,%.h,$(SOURCES_C))
 	$(RM) -f $(patsubst %.asm,%.o,$(SOURCES_ASM))
 
 .PHONY: all clean
