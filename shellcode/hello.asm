@@ -8,7 +8,7 @@ jmp short string
 code:
 pop		ecx
 mov		bl,1
-mov		dl,12
+mov		dl,13
 mov		al,4
 int		0x80
 dec		bl
@@ -16,4 +16,4 @@ mov		al,1
 int		0x80
 string:
 call code
-db 'Hello World!'
+db 'Hello World!', 0x0A
