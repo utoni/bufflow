@@ -30,6 +30,8 @@ ifeq ($(LBITS),64)
 	-$(CC) $(CFLAGS) $(X64_FLAGS) $(OCFLAGS) -o $@_x64 $<
 endif
 
+rebuild: clean all
+
 clean:
 	$(RM) -f *.o
 	$(RM) -f $(TARGETS) $(patsubst %,%_x64,$(TARGETS))
