@@ -58,9 +58,3 @@ mov		ebx,esp		; arg
 mov byte	[esp + 8], al	; null-terminate the string
 mov		al,0xb		; execve syscall
 int		0x80
-
-; exit()
-mov		al,0x1		; exit syscall
-xor		ebx,ebx
-mov		bl,0x42		; return code
-int		0x80		; kernel mode
