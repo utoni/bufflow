@@ -6,3 +6,4 @@ overflow_tcp
 overflow_tcp_x64
 sc-test
 sc-test_x64
+funcjmp_simple
