@@ -28,9 +28,14 @@
 int hookable(char *arg0, int arg1, int arg2)
 {
   asm("label:");
-  INTEL_ASM("nop; nop; nop");
+  INTEL_ASM("nop; nop; nop; pop eax; pop eax");
   asm("jmp end");
   return 0;
+}
+
+int testfkt(void *param)
+{
+  printf("Subroutine ..\n");
 }
 
 int main(int argc, char **argv)
@@ -40,6 +45,8 @@ int main(int argc, char **argv)
   asm("jmp label; \
 	end:");
   //hookable(NULL, 0x8, 0x9);
+  printf("Hello World!\n");
+  testfkt(NULL);
   return 66;
 }
 
