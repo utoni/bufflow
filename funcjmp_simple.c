@@ -29,6 +29,7 @@ JUMPABLE_FUNC(testfkt)
 {
   int var0 = 0x1, var1 = 0x2, var2 = 0x3;
   var0 += var1 + var2;
+  printf("Subroutine: %d = %d + %d\n", var0, var1, var2);
   return 0;
 }
 

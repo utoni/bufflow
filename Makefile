@@ -5,7 +5,7 @@ CC := gcc
 STRIP := strip
 LBITS := $(shell getconf LONG_BIT)
 CFLAGS += -Wall
-OCFLAGS += -z execstack -fno-stack-protector
+OCFLAGS += -zexecstack -znorelro -fno-stack-protector -fno-pie -ggdb -static
 X86_FLAGS = -m32 -mpreferred-stack-boundary=2
 X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
