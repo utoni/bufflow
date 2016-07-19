@@ -5,48 +5,36 @@
 #define INTEL_ASM(_asm_str) asm volatile(".intel_syntax noprefix"); \
 	asm volatile(_asm_str); \
 	asm volatile(".att_syntax prefix");
-#define JUMPABLE_FUNC(fname) __attribute__ ((__cdecl__)) int fname(void)
-#define JMP_FUNC_DECL(func) void *fptr = (void *)( &func );
-#define JMP_TO_FUNC \
-	INTEL_ASM(" \
-	        call getip; \
-	        jmp short donext; \
-	        cfunc: \
-	                mov eax,[fptr]; \
-	                add eax,0x0; \
-	                jmp eax; \
-	                ret; \
-	        getip: \
-	                nop; \
-	                jmp short cfunc; \
-	        donext: \
-	");
-
-#define PRE_JUMP(arg)
-		
 
 int hookable(char *arg0, int arg1, int arg2)
 {
   asm("label:");
-  INTEL_ASM("nop; nop; nop; pop eax; pop eax");
+  INTEL_ASM("nop; nop; nop");
+  printf("hookable ..\n");
+  asm("nop; nop; nop; pop %ebx; pop %eax; call *%eax; call *%ebx");
   asm("jmp end");
   return 0;
 }
 
-int testfkt(void *param)
+int testfkt(void)
 {
   printf("Subroutine ..\n");
+  return 0;
+}
+
+void testfkt2(void)
+{
+  printf("another Subroutine ..\n");
 }
 
 int main(int argc, char **argv)
 {
-  asm("push %0" : : "m" (hookable));
-  asm("push %0" : : "g" (hookable));
+  printf("main(...)\n");
+  asm("push %0" : : "g" (testfkt));
+  asm("push %0" : : "g" (testfkt2));
   asm("jmp label; \
 	end:");
-  //hookable(NULL, 0x8, 0x9);
-  printf("Hello World!\n");
-  testfkt(NULL);
+  printf("EOF!\n");
   return 66;
 }
 
