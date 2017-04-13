@@ -14,7 +14,7 @@ if [ $ret -eq 0 ]; then
   echo "$0: Some exploits will not work!"
 fi
 
-sysctl -w kernel.randomize_va_space=0 2>/dev/null
-sysctl -w kernel.exec-shield=0 2>/dev/null
-echo "done."
+set -x
+sysctl -w kernel.randomize_va_space=0
+sysctl -w kernel.exec-shield=0
 
