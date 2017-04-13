@@ -8,4 +8,5 @@ sc-test
 sc-test_x64
 funcjmp_simple
 funcjmp_ext
+funcjmp_ext_x86
 format

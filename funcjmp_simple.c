@@ -5,7 +5,7 @@
 #define INTEL_ASM(_asm_str) asm volatile(".intel_syntax noprefix"); \
 	asm volatile(_asm_str); \
 	asm volatile(".att_syntax prefix");
-#define JUMPABLE_FUNC(fname) __attribute__ ((__cdecl__)) int fname(void)
+#define JUMPABLE_FUNC(fname) int fname(void)
 #define JMP_FUNC_DECL(func) void *fptr = (void *)( &func );
 #define JMP_TO_FUNC \
 	INTEL_ASM(" \

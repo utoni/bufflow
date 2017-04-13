@@ -13,20 +13,19 @@
 #define BUFLEN    300
 
 void
-overflow(const char *src, char *dst)
+overflow(const char *src)
 {
+  char buf[BUFLEN];
   /* exploitable function */
-  strcpy(dst, src);
+  strcpy(&buf[0], src);
   /* nothing to do, just return */
 }
 
 int
 main(int argc, char **argv)
 {
-  char buf[BUFLEN];
-
   if (argc > 1) {
-      overflow(argv[1], buf);
+      overflow(argv[1]);
   } else {
     fprintf(stderr, "arg1 missing\n");
     return(1);
