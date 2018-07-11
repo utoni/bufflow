@@ -6,7 +6,5 @@ overflow_tcp
 overflow_tcp_x64
 sc-test
 sc-test_x64
-funcjmp_simple
-funcjmp_ext
+funcjmp_simple_x86
 funcjmp_ext_x86
-format

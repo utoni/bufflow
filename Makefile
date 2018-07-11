@@ -11,7 +11,7 @@ X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
 TARGETS = $(patsubst %.c,%,$(SOURCES))
 
-all: $(TARGETS) shellcode crypter
+all: $(TARGETS) overflow_x64 overflow_tcp_x64 sc-test_x64 shellcode crypter
 
 main: $(TARGETS)
 
@@ -26,9 +26,8 @@ crypter:
 
 % : %.c
 	$(CC) $(CFLAGS) $(X86_FLAGS) $(OCFLAGS) -o $@ $<
-ifeq ($(LBITS),64)
-	-$(CC) $(CFLAGS) $(X64_FLAGS) $(OCFLAGS) -o $@_x64 $<
-endif
+%_x64 : %.c
+	$(CC) $(CFLAGS) $(X64_FLAGS) $(OCFLAGS) -o $@ $<
 
 rebuild: clean all
 

@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef __i386
+#error "Unsupported Architecture"
+#endif
 
 #define INTEL_ASM(_asm_str) asm volatile(".intel_syntax noprefix"); \
 	asm volatile(_asm_str); \
