@@ -1,3 +1,3 @@
-run
-info r
+r
+i r
 x/300xw $esp-0x300
