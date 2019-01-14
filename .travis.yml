@@ -1,0 +1,6 @@
+language: c asm
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install make binutils gcc
+script:
+- make
