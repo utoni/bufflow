@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,7 +29,8 @@ usage(const char *program) {
 
 static void
 barf(const char *msg) {
-  perror(msg);
+  if (errno)
+    perror(msg);
   exit(EXIT_FAILURE);
 }
 
@@ -36,10 +38,11 @@ int
 main(int argc, char **argv) {
   FILE *fp;
   void *code;
-  int arg, i, l, m = 15 /* max # of bytes to print on one line */;
+  size_t i;
+  int arg, l, m = 15 /* max # of bytes to print on one line */;
 
   struct stat sbuf;
-  long flen;
+  size_t flen;
   void (*fptr)(void);
 
   memset(&sbuf, '\0', sizeof(struct stat));
@@ -48,6 +51,8 @@ main(int argc, char **argv) {
     fprintf(stderr, "file: %s\n", argv[2]);
     barf("failed to stat");
   }
+  errno = 0;
+  if (!S_ISREG(sbuf.st_mode)) barf(NULL);
   flen = (long) sbuf.st_size;
   if (!(code = calloc(1, flen))) barf("failed to grab memory");
   if (!(fp = fopen(argv[2], "rb"))) barf("failed to open file");
@@ -62,7 +67,7 @@ main(int argc, char **argv) {
         (*fptr)();
         break;
       case 'p':
-        printf("\n/* The following shellcode is %ld bytes long */\n", flen);
+        printf("\n/* The following shellcode is %zu bytes long */\n", flen);
         printf("\nchar shellcode[] =\n");
         l = m;
         for (i = 0; i < flen; i++) {
