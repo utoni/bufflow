@@ -8,3 +8,7 @@ sc-test
 sc-test_x64
 funcjmp_simple_x86
 funcjmp_ext_x86
+exec_crypter
+exec_crypter_x64
+exec_payload
+exec_payload_x64
