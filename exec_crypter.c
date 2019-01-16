@@ -169,7 +169,8 @@ int main(int argc, char **argv) {
 
         printf("\nExtracting payload size %u\n",
                _exec_payload_size);
-        snprintf(exec_path, sizeof exec_path, "%s_", new_path);
+        snprintf(exec_path, sizeof exec_path, "%.*s_",
+                (int) sizeof exec_path - 2, new_path);
 
         exec_fd = open(exec_path, O_RDWR | O_CREAT,
                        S_IRWXU | S_IRWXG | S_IRWXO);
