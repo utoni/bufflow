@@ -1,0 +1,13 @@
+image: debian:stable-slim
+
+stages:
+  - build
+
+build:
+  script:
+    - apt-get -qq update
+    - apt-get install -y make binutils nasm gcc libc6-dev libc6-dev-i386
+    - make -j4 V=s
+  stage: build
+  only:
+    - master
