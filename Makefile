@@ -31,15 +31,17 @@ exec_payload_bin.o: exec_payload
 	$(STRIP) -s $<
 	$(AS) -felf32 -o $@ exec_crypter.asm
 
-exec_crypter: exec_payload_bin.o
-	$(CC) $(ECFLAGS) -m32 -D_NOTASKID=1 -o $@ $< exec_crypter.c
+exec_crypter: exec_payload_bin.o exec_crypter.c
+	$(CC) $(ECFLAGS) -m32 -D_NOTASKID=1 -o $@.o -c $@.c
+	$(CC) $(ECFLAGS) -m32 -D_NOTASKID=1 -o $@ $(patsubst %.c,%.o,$^)
 
 exec_payload_x64_bin.o: exec_payload_x64
 	$(STRIP) -s $<
 	$(AS) -felf64 -o $@ exec_crypter_x64.asm
 
-exec_crypter_x64: exec_payload_x64_bin.o
-	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@ $< exec_crypter.c
+exec_crypter_x64: exec_payload_x64_bin.o exec_crypter.c
+	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@.o -c exec_crypter.c
+	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@ exec_payload_x64_bin.o exec_crypter_x64.o
 
 debug:
 	$(MAKE) -C . CFLAGS="-g"

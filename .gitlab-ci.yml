@@ -2,6 +2,7 @@ image: debian:stable-slim
 
 stages:
   - build
+  - test
 
 build:
   script:
@@ -9,5 +10,18 @@ build:
     - apt-get install -y make binutils nasm gcc libc6-dev libc6-dev-i386
     - make -j4 V=s
   stage: build
+  artifacts:
+    untracked: true
+  only:
+    - master
+
+test:
+  script:
+    - ./funcjmp_simple_x86 || test $? -eq 66
+    - ./funcjmp_ext_x86 || test $? -eq 66
+    - ./exec_crypter
+  stage: test
+  dependencies:
+    - build
   only:
     - master
