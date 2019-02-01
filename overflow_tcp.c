@@ -1,9 +1,15 @@
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#include <windows.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
+#endif
 #include <string.h>
 #include <unistd.h>
 
