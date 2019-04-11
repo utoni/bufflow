@@ -9,6 +9,9 @@ build:
     - apt-get -qq update
     - apt-get install -y make binutils nasm gcc libc6-dev libc6-dev-i386
     - make -j4 V=s
+  after_script:
+    - cat crypter/xor_encoder.h
+    - cat crypter/xor2_encoder.h
   stage: build
   artifacts:
     untracked: true
