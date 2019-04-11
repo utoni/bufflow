@@ -70,7 +70,7 @@ exec_crypter_x64: exec_payload_x64_bin.o exec_crypter.c
 	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@ exec_payload_x64_bin.o exec_crypter_x64.o
 
 funccrypt: funccrypt.c
-	$(CC) $(ECFLAGS) -o $@ $<
+	$(CC) $(ECFLAGS) -m32 -o $@ $<
 
 funccrypt_x64: funccrypt.c
 	$(CC) $(ECFLAGS) -m64 -o $@ $<
