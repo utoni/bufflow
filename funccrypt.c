@@ -30,8 +30,9 @@ typedef enum crypt_return {
 static int crypted_fn(int arg0, char *arg1, void *arg2)
 {
     CRYPT_PROLOGUE
+    int i;
     printf("I'm decrypted ..\n");
-    for (int i = 0; i < 32; ++i)
+    for (i = 0; i < 32; ++i)
         printf("%d ", i);
     puts("");
     CRYPT_EPILOGUE
@@ -48,13 +49,14 @@ static void crypted_fn2(void)
 
 static crypt_return crypt_func(void *fn_start)
 {
+    int i;
     enum crypt_return cret = CRET_ERROR;
     uint8_t *fnbuf = (uint8_t *) fn_start;
     const uint32_t prologue_marker = 0xC0DEC0DE;
     const uint32_t epilogue_marker = 0xCAFECAFE;
 
     printf("Fn: %p\n", fnbuf);
-    for (int i = 0; i < 0x100; ++i) {
+    for (i = 0; i < 0x100; ++i) {
         if (cret == CRET_ERROR &&
             *(uint32_t *) &fnbuf[i] == prologue_marker)
         {
@@ -75,7 +77,9 @@ static crypt_return crypt_func(void *fn_start)
 
 static void printHexBuf(uint8_t *buf, size_t siz, size_t chars_per_line)
 {
-    for (int i = 0; i < siz; ++i) {
+    int i;
+
+    for (i = 0; i < siz; ++i) {
         printf("%02X ", buf[i]);
         if ((i+1) % chars_per_line == 0)
             printf("\n");
@@ -97,4 +101,6 @@ int main(void)
     printf("\noutput:\n");
     printf("crypted_fn: 0x%X\n", crypted_fn(0, NULL, NULL));
     crypted_fn2();
+
+    return 0;
 }
