@@ -34,7 +34,7 @@ SOURCES = $(wildcard *.c)
 TARGETS = $(patsubst %.c,%,$(SOURCES))
 
 ifeq ($(LBITS),64)
-all: $(TARGETS) exec_payload_x64 exec_crypter_x64 overflow_x64 overflow_tcp_x64 sc-test_x64 shellcode crypter
+all: $(TARGETS) exec_payload_x64 exec_crypter_x64 overflow_x64 overflow_tcp_x64 sc-test_x64 funccrypt_x64 shellcode crypter
 else
 all: $(TARGETS) shellcode crypter
 endif
@@ -69,6 +69,12 @@ exec_crypter_x64: exec_payload_x64_bin.o exec_crypter.c
 	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@.o -c exec_crypter.c
 	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@ exec_payload_x64_bin.o exec_crypter_x64.o
 
+funccrypt: funccrypt.c
+	$(CC) $(ECFLAGS) -o $@ $<
+
+funccrypt_x64: funccrypt.c
+	$(CC) $(ECFLAGS) -m64 -o $@ $<
+
 debug:
 	$(MAKE) -C . CFLAGS="-g"
 
@@ -91,7 +97,7 @@ clean:
 ifneq ($(SF),)
 	$(RM) -f $(patsubst %,%$(SF),$(TARGETS))
 endif
-	$(RM) -f exec_payload_x64 exec_crypter_x64 overflow_x64 overflow_tcp_x64 sc-test_x64
+	$(RM) -f exec_payload_x64 exec_crypter_x64 overflow_x64 overflow_tcp_x64 sc-test_x64 funccrypt_x64
 ifneq ($(SF),)
 	$(RM) -f exec_payload_x64$(SF) exec_crypter_x64$(SF) overflow_x64$(SF) overflow_tcp_x64$(SF) sc-test_x64$(SF)
 endif
