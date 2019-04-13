@@ -19,11 +19,16 @@ typedef struct crypt_header {
     uint64_t func_body[0];
 } GCC_PACKED crypt_header;
 
+#define CRYPT_FUNC_MAXSIZ 0x100
 #define CRYPT_FUNC(fn) \
     crypt_func((void *)fn)
 #define CRYPT_PROLOGUE(fn) \
+    crypt_return __cr; \
     { \
-        CRYPT_FUNC(fn); \
+        __cr = CRYPT_FUNC(fn); \
+        if (__cr != CRET_OK) \
+            asm volatile goto("jmp %l0          \n" \
+                : : : : cr_epilogue); \
         asm volatile goto("jmp %l0          \n" \
             : : : : cr_prologue); \
         asm volatile( \
@@ -113,7 +118,7 @@ static crypt_return crypt_func(void *fn_start)
     size_t crypt_size;
 
     printf("Fn: %p\n", fnbuf);
-    for (i = 0; i < 0x100; ++i) {
+    for (i = 0; i < CRYPT_FUNC_MAXSIZ; ++i) {
         if (cret == CRET_ERROR &&
             *(uint32_t *) &fnbuf[i] == prologue_marker)
         {
