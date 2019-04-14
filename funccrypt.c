@@ -14,14 +14,14 @@
 
 typedef struct crypt_header {
     uint64_t key;
-    uint8_t crpyted;
+    uint8_t crypted;
     uint32_t marker;
     uint64_t func_body[0];
 } GCC_PACKED crypt_header;
 
 #define CRYPT_FUNC_MAXSIZ 0x100
 #define CRYPT_FUNC(fn) \
-    crypt_func((void *)fn)
+    crypt_func((void *)fn, 0)
 #define CRYPT_PROLOGUE(fn) \
     crypt_return __cr; \
     { \
@@ -66,15 +66,16 @@ typedef struct crypt_header {
 
 
 typedef enum crypt_return {
-    CRET_ERROR, CRET_PROLOGUE, CRET_EPILOGUE, CRET_CHECK, CRET_OK
+    CRET_ERROR, CRET_PROLOGUE, CRET_EPILOGUE, CRET_CHECK, CRET_OK,
+    CRET_CHECK_ENCRYPTED, CRET_CHECK_PLAIN
 } crypt_return;
 
 static const char *crypt_strs[] = {
-    "ERROR", "PROLOGUE", "EPILOGUE", "CHECK", "OK"
+    "ERROR", "PROLOGUE", "EPILOGUE", "CHECK", "OK", "ENCRYPTED", "PLAIN"
 };
 
 
-static crypt_return crypt_func(void *fn_start);
+static crypt_return crypt_func(void *fn_start, int do_check);
 static void printHexBuf(uint8_t *buf, size_t siz, size_t chars_per_line);
 
 static int crypted_fn(int arg0, char *arg1, void *arg2)
@@ -106,7 +107,7 @@ CRYPT_FNDEF(crypted_fn3, void *arg0, int arg1, const char *arg2)
 }
 CRYPT_FNEND(crypted_fn3);
 
-static crypt_return crypt_func(void *fn_start)
+static crypt_return crypt_func(void *fn_start, int do_check)
 {
     size_t i;
     enum crypt_return cret = CRET_ERROR;
@@ -122,14 +123,18 @@ static crypt_return crypt_func(void *fn_start)
         if (cret == CRET_ERROR &&
             *(uint32_t *) &fnbuf[i] == prologue_marker)
         {
+#if 0
             printf("Prologue Marker: %p\n", &fnbuf[i]);
+#endif
             pro = &fnbuf[i];
             cret = CRET_PROLOGUE;
         } else
         if (cret == CRET_PROLOGUE &&
             *(uint32_t *) &fnbuf[i] == epilogue_marker)
         {
+#if 0
             printf("Epilogue Marker: %p\n", &fnbuf[i]);
+#endif
             epi = &fnbuf[i];
             cret = CRET_EPILOGUE;
             break;
@@ -147,19 +152,26 @@ static crypt_return crypt_func(void *fn_start)
         printHexBuf(epi, 4, 4);
 #endif
         hdr = (crypt_header *)(pro + sizeof(prologue_marker) - sizeof *hdr);
+        if (do_check) {
+            return hdr->crypted == 0x00
+                ? CRET_CHECK_PLAIN
+                : CRET_CHECK_ENCRYPTED;
+        }
         crypt_size = epi - (pro + sizeof(prologue_marker)) - 1;
 
         if (i &&
-            (hdr->crpyted == 0x00 || hdr->crpyted == 0xFF) &&
+            (hdr->crypted == 0x00 || hdr->crypted == 0xFF) &&
             (long int)crypt_size < sysconf(_SC_PAGESIZE))
         {
             mbuf = (uint8_t *)( (long int)hdr & ~(sysconf(_SC_PAGESIZE) - 1) );
             if (!mprotect(mbuf, sysconf(_SC_PAGESIZE), PROT_READ|PROT_WRITE|PROT_EXEC))
             {
-                if (hdr->crpyted == 0x00) {
-                    hdr->crpyted = 0xFF;
+                if (hdr->crypted == 0x00) {
+                    hdr->crypted = 0xFF;
                     hdr->key = (uint64_t) rand() << 32;
                     hdr->key |= rand();
+                } else {
+                    hdr->crypted = 0x00;
                 }
                 for (i = 0; i < crypt_size / 0x8; ++i) {
                     hdr->func_body[i] ^= hdr->key;
@@ -189,6 +201,8 @@ static void printHexBuf(uint8_t *buf, size_t siz, size_t chars_per_line)
 
 int main(void)
 {
+    crypt_return cret;
+
     srand(time(NULL));
 
     printf("Before Encryption:\n");
@@ -200,12 +214,24 @@ int main(void)
     printHexBuf((uint8_t *)crypted_fn3, 160, 32);
 
     printf("\nAfter Encryption:\n");
-    printf("crypted_fn return val: %s\n",
-           crypt_strs[ crypt_func((void *)crypted_fn) ]);
-    printf("crypted_fn2 return val: %s\n",
-           crypt_strs[ crypt_func((void *)crypted_fn2) ]);
-    printf("crypted_fn3 return val: %s\n",
-           crypt_strs[ crypt_func((void *)crypted_fn3) ]);
+
+    cret = crypt_func((void *)crypted_fn, 1);
+    printf("crypted_fn check return val: %s\n", crypt_strs[cret]);
+    if (cret == CRET_CHECK_PLAIN)
+        printf("crypted_fn return val: %s\n",
+               crypt_strs[ crypt_func((void *)crypted_fn, 0) ]);
+
+    cret = crypt_func((void *)crypted_fn2, 1);
+    printf("crypted_fn2 check return val: %s\n", crypt_strs[cret]);
+    if (cret == CRET_CHECK_PLAIN)
+        printf("crypted_fn2 return val: %s\n",
+               crypt_strs[ crypt_func((void *)crypted_fn2, 0) ]);
+
+    cret = crypt_func((void *)crypted_fn3, 1);
+    printf("crypted_fn3 check return val: %s\n", crypt_strs[cret]);
+    if (cret == CRET_CHECK_PLAIN)
+        printf("crypted_fn3 return val: %s\n",
+               crypt_strs[ crypt_func((void *)crypted_fn3, 0) ]);
 
     printf("crypted_fn:\n");
     printHexBuf((uint8_t *)crypted_fn, 160, 32);
