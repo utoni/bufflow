@@ -1,0 +1,8 @@
+A collection of security related code examples.
+
+This project includes a buffer overflow and exploit set.
+
+It does also provide some example shellcodes and a set of different crypter.
+
+The crypter designed to work with shellcode are located in the crypter subdir.
+Additional crypter based on function/exec level can be found in the rootdir.
