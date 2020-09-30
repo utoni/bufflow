@@ -7,6 +7,14 @@
 #include <sys/mman.h> /* PROT_* */
 
 
+#ifndef __GNUC__
+#error "Unknown compiler; Only GCC supports `asm goto'."
+#endif
+
+#ifdef __clang__
+#error "CLang does not support `asm goto' (yet?)."
+#endif
+
 /* Force GCC struct for MingW compilers and pack them,
  * which means the struct is 1-byte aligned.
  */
