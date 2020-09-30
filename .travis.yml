@@ -1,6 +1,12 @@
 language: c asm
 before_install:
 - sudo apt-get -qq update
-- sudo apt-get install -y make binutils nasm gcc libc6-dev libc6-dev-i386
+- sudo apt-get install -y build-essential make binutils nasm gcc gcc-multilib libc6-dev libc6-dev-i386
 script:
 - make
+- ./exec_crypter && ./exec_crypter # encrypt && decrypt
+- ./exec_crypter_x64 && ./exec_crypter_x64 # encrypt && decrypt
+- ./funccrypt
+- ./funccrypt_x64
+- ./funcjmp_simple_x86
+- ./funcjmp_ext_x86

@@ -39,5 +39,5 @@ JUMPABLE_FUNC(testfkt)
 int main(int argc, char **argv)
 {
   JMP_TO_FUNC;
-  return 66;
+  return 0;
 }

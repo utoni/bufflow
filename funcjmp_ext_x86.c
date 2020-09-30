@@ -38,6 +38,6 @@ int main(int argc, char **argv)
   asm("jmp label; \
 	end:");
   printf("EOF!\n");
-  return 66;
+  return 0;
 }
 
