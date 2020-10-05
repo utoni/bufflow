@@ -22,12 +22,11 @@ NF64 := elf64
 endif
 STRIP := strip
 LBITS := $(shell getconf LONG_BIT)
-CFLAGS += -Wall -O0 -g
+CFLAGS += -Wall -O0 -g3
 OCFLAGS := -fno-stack-protector -fno-pie -ggdb -static
 ifeq ($(BUILD_MINGW32),)
 OCFLAGS += -zexecstack -znorelro
 endif
-ECFLAGS += -Wall -O2 -ggdb
 X86_FLAGS = -m32 -mpreferred-stack-boundary=2
 X64_FLAGS = -m64 -mpreferred-stack-boundary=4
 SOURCES = $(wildcard *.c)
@@ -42,21 +41,21 @@ endif
 main: $(TARGETS)
 
 exec_payload: exec_payload.c
-	$(CC) $(ECFLAGS) -m32 -o $@$(SF) $<
+	$(CC) $(CFLAGS) -m32 -o $@$(SF) $<
 ifneq ($(SF),)
 	$(LN) -f -s $@$(SF) $@
 endif
 
 exec_payload_x64: exec_payload.c
-	$(CC) $(ECFLAGS) -m64 -o $@$(SF) $<
+	$(CC) $(CFLAGS) -m64 -o $@$(SF) $<
 
 exec_payload_bin.o: exec_payload
 	$(STRIP) -s $<$(SF)
 	$(AS) -f$(NF32) -o $@ exec_crypter.asm
 
 exec_crypter: exec_payload_bin.o exec_crypter.c
-	$(CC) $(ECFLAGS) -m32 -D_NOTASKID=1 -o $@.o -c $@.c
-	$(CC) $(ECFLAGS) -m32 -D_NOTASKID=1 -o $@ $(patsubst %.c,%.o,$^)
+	$(CC) $(CFLAGS) -m32 -D_NOTASKID=1 -o $@.o -c $@.c
+	$(CC) $(CFLAGS) -m32 -D_NOTASKID=1 -o $@ $(patsubst %.c,%.o,$^)
 ifneq ($(SF),)
 	$(LN) -f -s $@$(SF) $@
 endif
@@ -66,14 +65,14 @@ exec_payload_x64_bin.o: exec_payload_x64
 	$(AS) -f$(NF64) -o $@ exec_crypter_x64.asm
 
 exec_crypter_x64: exec_payload_x64_bin.o exec_crypter.c
-	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@.o -c exec_crypter.c
-	$(CC) $(ECFLAGS) -m64 -D_NOTASKID=1 -o $@ exec_payload_x64_bin.o exec_crypter_x64.o
+	$(CC) $(CFLAGS) -m64 -D_NOTASKID=1 -o $@.o -c exec_crypter.c
+	$(CC) $(CFLAGS) -m64 -D_NOTASKID=1 -o $@ exec_payload_x64_bin.o exec_crypter_x64.o
 
-funccrypt: funccrypt.c
-	$(CC) $(ECFLAGS) -m32 -o $@ $<
+funccrypt: funccrypt.c utils.h
+	$(CC) $(CFLAGS) -m32 -o $@ $< -lm
 
-funccrypt_x64: funccrypt.c
-	$(CC) $(ECFLAGS) -m64 -o $@ $<
+funccrypt_x64: funccrypt.c utils.h
+	$(CC) $(CFLAGS) -m64 -o $@ $< -lm
 
 debug:
 	$(MAKE) -C . CFLAGS="-g"
