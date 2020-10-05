@@ -134,7 +134,9 @@ static crypt_return crypt_func(void *fn_start, int do_check,
     crypt_header *hdr = NULL;
     size_t crypt_size = 0;
 
+#if VERBOSE
     printf("Fn: %p\n", fnbuf);
+#endif
     for (i = 0; i < CRYPT_FUNC_MAXSIZ; ++i) {
         if (cret == CRET_ERROR &&
             *(uint32_t *) &fnbuf[i] == prologue_marker)
@@ -226,32 +228,42 @@ static void printHexBuf(uint8_t *buf, size_t siz, size_t chars_per_line)
 static void calcAndPrintEntropy(struct crypt_header * const func_crypt_header,
                                 size_t const func_body_size)
 {
-    printf("Entropy of %p with size %zu: %lf\n", func_crypt_header, func_body_size,
+    printf("entropy of %s function: %lf\n", (func_crypt_header->crypted == 0xFF ? "encrypted" : "unencrypted"),
            entropy_from_buffer((uint8_t *)func_crypt_header->func_body, func_body_size));
 }
 
-int main(void)
+static void initRandom(void)
+{
+    struct timespec ts;
+
+    clock_gettime(CLOCK_REALTIME, &ts);
+    srand((int)(ts.tv_sec + ts.tv_nsec));
+}
+
+int main(int argc, char ** argv)
 {
     struct crypt_header * hdr = NULL;
     size_t func_body_size = 0;
     crypt_return cret;
 
-    srand(time(NULL));
+    (void)argc;
+    (void)argv;
+
+    initRandom();
 
     cret = crypt_func((void *)some_fn, 1, &hdr, &func_body_size);
 
     printf("some_fn check return val: %s\n", crypt_strs[cret]);
     calcAndPrintEntropy(hdr, func_body_size);
-    printf("some_fn unencrypted:\n");
     printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
 
     if (cret == CRET_CHECK_PLAIN) {
         cret = crypt_func((void *)some_fn, 0, &hdr, &func_body_size);
         assert(cret == CRET_OK);
 
-        printf("some_fn encryption return val: %s\n", crypt_strs[cret]);
+        printf("\nsome_fn encryption return val: %s\n", crypt_strs[cret]);
         calcAndPrintEntropy(hdr, func_body_size);
-        printf("some_fn encrypted:\n");
+        printf("\nsome_fn encrypted:\n");
         printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
     }
 
@@ -261,16 +273,15 @@ int main(void)
 
     printf("another_fn check return val: %s\n", crypt_strs[cret]);
     calcAndPrintEntropy(hdr, func_body_size);
-    printf("another_fn unencrypted:\n");
     printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
 
     if (cret == CRET_CHECK_PLAIN) {
         cret = crypt_func((void *)another_fn, 0, &hdr, &func_body_size);
         assert(cret == CRET_OK);
 
-        printf("another_fn return val: %s\n", crypt_strs[cret]);
+        printf("\nanother_fn return val: %s\n", crypt_strs[cret]);
         calcAndPrintEntropy(hdr, func_body_size);
-        printf("another_fn encrypted:\n");
+        printf("\nanother_fn encrypted:\n");
         printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
     }
 
@@ -280,16 +291,15 @@ int main(void)
 
     printf("fndef_fn check return val: %s\n", crypt_strs[cret]);
     calcAndPrintEntropy(hdr, func_body_size);
-    printf("fndef_fn unencrypted:\n");
     printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
 
     if (cret == CRET_CHECK_PLAIN) {
         cret = crypt_func((void *)fndef_fn, 0, &hdr, &func_body_size);
         assert(cret == CRET_OK);
 
-        printf("fndef_fn return val: %s\n", crypt_strs[cret]);
+        printf("\nfndef_fn return val: %s\n", crypt_strs[cret]);
         calcAndPrintEntropy(hdr, func_body_size);
-        printf("fndef_fn encrypted:\n");
+        printf("\nfndef_fn encrypted:\n");
         printHexBuf((uint8_t *)hdr->func_body, func_body_size, 32);
     }
 
