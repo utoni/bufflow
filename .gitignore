@@ -1,5 +1,7 @@
 *.swp
 *.o
+*.exe
+return-to-lib
 overflow
 overflow_x64
 overflow_tcp

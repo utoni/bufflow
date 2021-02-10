@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/* 300 bytes buffer len + 4 bytes for overwrite return opcode */
 #define BUFLEN    300
 
 void
@@ -24,6 +23,10 @@ overflow(const char *src)
 int
 main(int argc, char **argv)
 {
+  /* force system() symbol import for return-to-lib.c exploitation */
+  void * system_fn = system;
+  (void)system_fn;
+
   if (argc > 1) {
       overflow(argv[1]);
   } else {
