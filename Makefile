@@ -27,8 +27,8 @@ OCFLAGS := -fno-stack-protector -fno-pie -ggdb -static
 ifeq ($(BUILD_MINGW32),)
 OCFLAGS += -zexecstack -znorelro
 endif
-X86_FLAGS = -m32 -mpreferred-stack-boundary=2
-X64_FLAGS = -m64 -mpreferred-stack-boundary=4
+X86_FLAGS = -m32
+X64_FLAGS = -m64
 SOURCES = $(wildcard *.c)
 TARGETS = $(patsubst %.c,%,$(SOURCES))
 

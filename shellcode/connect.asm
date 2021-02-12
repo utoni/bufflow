@@ -1,6 +1,7 @@
 BITS 32
 
 
+add     esp,64      ; keep some bytes between code<->stack
 ; socket()
 xor		eax,eax		; zero out eax
 xor		ebx,ebx		;   "   "  ebx
